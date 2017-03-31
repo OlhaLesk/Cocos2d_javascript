@@ -25,7 +25,7 @@ var game = cc.Layer.extend({
         for (i = 0; i < 16; i++)
         {
             var backgroundSprite = new MemoryTile();
-            this.addChild(backgroundSprite, 0);
+            this.addChild(backgroundSprite, 0);  
             backgroundSprite.setPosition(size.width / 3 + i % 4 * 105, 400 - Math.floor(i / 4) * 74);
         }
                                       
@@ -33,14 +33,14 @@ var game = cc.Layer.extend({
         var coinSprite = new cc.Sprite(res.Coin_png);
         coinSprite.attr({
             x: size.width / 100 * 10,
-            y: size.height - size.height / 15
+            y: size.height - size.height / 10
         });
         this.addChild(coinSprite, 0);
                                       
         // add a label which shows "Money: "
         var moneyLabel = new cc.LabelTTF("Money: ", "Arial", 36);
         moneyLabel.x = size.width / 100 * 10 + coinSprite.width * 2;
-        moneyLabel.y = size.height - size.height / 15; // 1/10
+        moneyLabel.y = size.height - size.height / 10; // 1/10
         // add the label as a child to this layer
         this.addChild(moneyLabel, 5);
                                       
@@ -48,7 +48,7 @@ var game = cc.Layer.extend({
         profit = 0;
         profitLabel = new cc.LabelTTF(profit.toString(), "Arial", 36);
         profitLabel.x = size.width / 100 * 10 + coinSprite.width + moneyLabel.width * 1.5;
-        profitLabel.y = size.height - size.height / 15;
+        profitLabel.y = size.height - size.height / 10;
         // add the label as a child to this layer
         this.addChild(profitLabel, 5);
                            
