@@ -7,17 +7,27 @@ var profitLabel;
 var flyingCoin;
 
 var ripeWheat;
-var BackgroundLayer = cc.Layer.extend({
-                                      ctor:function () {
-                                      this._super();
-                                      var size = cc.winSize;
-                                      
-                                      //  var backgroundLayer = cc.LayerColor.create(new cc.Color(40, 40, 40, 255), size.width, size.height);
-                                      //                                      this.addChild(backgroundLayer);
-                                      
-                                      var gradient = cc.LayerGradient.create(cc.color(0, 0, 0, 255), cc.color(0x46, 0x82, 0xB4, 255)); //RGBA
-                                      this.addChild(gradient);
-                                      
+
+var gameLayer;
+var wheat;
+var gameScene = cc.Scene.extend({
+                                onEnter:function () {
+                                this._super();
+                                gameLayer = new game();
+                                gameLayer.init();
+                                this.addChild(gameLayer);
+                                }
+                                });
+
+var game = cc.Layer.extend({
+                           ctor:function () {
+                           this._super();
+                           var size = cc.winSize;
+               
+                          
+                           var gradient = cc.LayerGradient.create(cc.color(0, 0, 0, 255), cc.color(0x46, 0x82, 0xB4, 255)); //RGBA
+                           this.addChild(gradient);
+                           
                                       // add background
                                       for (i = 0; i < 16; i++)
                                       {
@@ -48,55 +58,18 @@ var BackgroundLayer = cc.Layer.extend({
                                       profitLabel.y = size.height - size.height / 15; // 1/10
                                       // add the label as a child to this layer
                                       this.addChild(profitLabel, 5);
-                                      
-                                      // add seed tiles
-                                      for (i = 0; i < 4; i++)
-                                      {
-                                      switch (i) {
-                                      case 0:
-                                      wheatSprite = new cc.Sprite();
-                                      wheatSprite.setTexture(res.Wheat_01_png);
-                                      
-                                      this.addChild(wheatSprite, 0);
-                                      wheatSprite.setPosition(size.width / 3 + i % 4 * 105, 400 - Math.floor(i / 4) * 74);
-                                      
-                                      wheatSprite.tag = 0;
-                                      Ripeness(wheatSprite.tag);
-                                      break;
-                                      case 1:
-                                      strawberrySprite = cc.Sprite.create(res.Strawberry_01_png);
-                                      this.addChild(strawberrySprite, 0);
-                                      strawberrySprite.setPosition(size.width / 3 + i % 4 * 105, 400 - Math.floor(i / 4) * 74);
-                                      
-                                      strawberrySprite.tag = 2;
-                                      Ripeness(strawberrySprite.tag);
-                                      break;
-                                      case 2:
-                                      carrotSprite = cc.Sprite.create(res.Carrot_01_png);
-                                      this.addChild(carrotSprite, 0);
-                                      carrotSprite.setPosition(size.width / 3 + i % 4 * 105, 400 - Math.floor(i / 4) * 74);
-                                      
-                                      carrotSprite.tag = 4;
-                                      Ripeness(carrotSprite.tag);
-                                      break;
-                                      case 3:
-                                      cabbageSprite = cc.Sprite.create(res.Cabbage_01_png);
-                                      this.addChild(cabbageSprite, 0);
-                                      cabbageSprite.setPosition(size.width / 3 + i % 4 * 105, 400 - Math.floor(i / 4) * 74);
-                                      
-                                      cabbageSprite.tag = 6;
-                                      Ripeness(cabbageSprite.tag);
-                                      break;
-                                      }
-                                      }
-                                      
-                                      flyingCoin = new cc.Sprite(res.Coin_png);
-                                      flyingCoin.setOpacity(0);
-                                      this.addChild(flyingCoin, 0);
-                                      
-                                      return true;
-                                      }
-                                      });
+                           
+                           wheat = new Wheat();
+                           this.addChild(wheat);
+                           
+                           Ripeness(wheat);
+                           
+                           flyingCoin = new cc.Sprite(res.Coin_png);
+                           flyingCoin.setOpacity(0);
+                           this.addChild(flyingCoin, 0);
+                           
+                           }
+                           });
 
 
 // new type that extends the Sprite class
@@ -107,54 +80,39 @@ var MemoryTile = cc.Sprite.extend({
                                   }
                                   })
 
-function Ripeness(tag) {
-    switch(tag) {
-        case 0:
-            WheatRipeness();
-            break;
-        case 2:
-            StrawberryRipeness();
-            break;
-        case 4:
-            CarrotRipeness();
-            break;
-        case 6:
-            CabbageRipeness();
-            break;
-    }
-}
+var Wheat = cc.Sprite.extend({
+                             ctor:function() {
+                             this._super();
+                             this.setTexture(res.Wheat_01_png);
+                             this.setPosition(335, 400);
+                             this.ripe = false;
+                             this.tag = 0;
+                             this.profitSum = 1;
+                             this.ripenessTime = 2000;
+                             }
+                             })
 
-function WheatRipeness() {
-    ripeWheat = false;
+function Ripeness(sprite) {
     var pause = setTimeout(function() {
-                           wheatSprite.setTexture(res.Wheat_02_png);
-                           ripeWheat = true;
-                           }, 2000);
-    cc.eventManager.addListener(listener.clone(), wheatSprite); // using "clone" we dublicate the listener for each tile
+                           switch(sprite.tag) {
+                           case 0:
+                           sprite.setTexture(res.Wheat_02_png);
+                           break;
+                           case 2:
+                           sprite.setTexture(res.Strawberry_02_png);
+                           break;
+                           case 4:
+                           sprite.setTexture(res.Carrot_02_png);
+                           break;
+                           case 6:
+                           sprite.setTexture(res.Cabbage_02_png);
+                           break;
+                           }
+                           sprite.ripe = true;
+                           }, sprite.ripenessTime);
+    cc.eventManager.addListener(listener.clone(), sprite); // using "clone" we dublicate the listener for each tile
 }
 
-function StrawberryRipeness() {
-    var pause = setTimeout(function() {
-                           strawberrySprite.setTexture(res.Strawberry_02_png);
-                           }, 8000);
-    cc.eventManager.addListener(listener.clone(), strawberrySprite); // using "clone" we dublicate the listener for each tile
-}
-
-function CarrotRipeness() {
-    var pause = setTimeout(function() {
-                           carrotSprite.setTexture(res.Carrot_02_png);
-                           }, 16000);
-    cc.eventManager.addListener(listener.clone(), carrotSprite); // using "clone" we dublicate the listener for each tile
-}
-
-function CabbageRipeness() {
-    var pause = setTimeout(function() {
-                           cabbageSprite.setTexture(res.Cabbage_02_png);
-                           }, 32000);
-    cc.eventManager.addListener(listener.clone(), cabbageSprite); // using "clone" we dublicate the listener for each tile
-}
-
-// the basic listener
 var listener = cc.EventListener.create({
                                        event: cc.EventListener.TOUCH_ONE_BY_ONE, // waits for touches (one at a time)
                                        swallowTouches: true, // for mouse clicking
@@ -164,9 +122,9 @@ var listener = cc.EventListener.create({
                                        var targetSize = target.getContentSize();
                                        var targetRectangle = cc.rect(0, 0, targetSize.width, targetSize.height);
                                        if (cc.rectContainsPoint(targetRectangle, location)) {
-                                       if (ripeWheat == true) {
+                                       if (target.ripe) {
                                        target.initWithFile("res/tile_" + target.tag + ".png");
-                                       ProfitCounter(target.tag);
+                                       ProfitCounter(target);
                                        
                                        flyingCoin.setPosition(touch.getLocation());
                                        var spriteAction1 = cc.FadeIn.create(0);
@@ -175,38 +133,17 @@ var listener = cc.EventListener.create({
                                        var sequenceAction = cc.Sequence.create(spriteAction1, spriteAction2, spriteAction3, cc.callFunc(SetProfitLabel, this));
                                        flyingCoin.runAction(sequenceAction);
                                        
-                                       ripeWheat = false;
-                                       Ripeness(target.tag);
+                                       target.ripe = false;
+                                       Ripeness(target);
                                        }
                                        }
                                        }
                                        })
 
-function ProfitCounter(tag) {
-    switch(tag) {
-        case 0:
-            profit += 1;
-            break;
-        case 2:
-            profit += 10;
-            break;
-        case 4:
-            profit += 100;
-            break;
-        case 6:
-            profit += 1000;
-            break;
-    }
+function ProfitCounter(sprite) {
+    profit += sprite.profitSum;
 }
 
 function SetProfitLabel() {
     profitLabel.setString(profit.toString());
 }
-
-var TestScene = cc.Scene.extend({
-                                onEnter:function () {
-                                this._super();
-                                var gameLayer = new BackgroundLayer();
-                                this.addChild(gameLayer);
-                                }
-                                });
